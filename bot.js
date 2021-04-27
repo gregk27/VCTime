@@ -57,6 +57,11 @@ async function join(message){
     let channel = message.member.voice.channel;
     let guild = message.guild;
 
+    // Do not join multiple times, may cause bugs with updates
+    if(servers[guild.id] != undefined){
+        return;
+    }
+
     connection.query("SELECT * FROM servers WHERE id=?", [guild.id], (err, res, fields)=>{
         // If the server is new, add and cache it
         if(res.length == 0){
@@ -87,6 +92,7 @@ async function join(message){
             connection.on('disconnect', ()=>{
                 guild.me.setNickname("VCTime | !time to join");
                 clearInterval(interval);
+                servers[guild.id] = undefined;
             })
         });
     })
