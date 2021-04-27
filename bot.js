@@ -1,8 +1,25 @@
-import { token } from "./secrets.js";
+import { token, DB_HOST, DB_USER, DB_PASS } from "./secrets.js";
 import Discord, { DataResolver } from "discord.js";
 import { DateTime } from 'luxon';
+import mysql from "mysql";
 
 const client = new Discord.Client();
+
+var connection = mysql.createConnection({
+    host: DB_HOST,
+    user: DB_USER,
+    password: DB_PASS,
+    database: 'vctime'
+})
+
+connection.connect(err => {
+    if(err){
+        console.error("Error connecting: "+err.stack);
+        process.exit(1);
+    } else {
+        console.log("Database connected")
+    }
+})
 
 client.once('ready', ()=>{
     console.log("Ready!");
@@ -34,6 +51,7 @@ client.on('message', message =>{
     if(message.content.match(/^!time\w*/g)){
         let channel = message.member.voice.channel;
         let guild = message.guild;
+
 
         // Set time on join
         guild.me.setNickname(getTimeString());

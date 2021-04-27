@@ -22,7 +22,8 @@
   "homepage": "https://github.com/gregk27/vctime#readme",
   "dependencies": {
     "discord.js": "^12.5.3",
-    "luxon": "^1.26.0"
+    "luxon": "^1.26.0",
+    "mysql": "^2.18.1"
   },
   "type": "module"
 }
