@@ -1,6 +1,6 @@
 import { token, DB_HOST, DB_USER, DB_PASS } from "./secrets.js";
 import Discord, { DataResolver } from "discord.js";
-import { DateTime } from 'luxon';
+import { DateTime, IANAZone } from 'luxon';
 import mysql from "mysql";
 
 const client = new Discord.Client();
@@ -66,10 +66,10 @@ async function join(message){
         // If the server is new, add and cache it
         if(res.length == 0){
             connection.query("INSERT INTO servers (id) VALUES (?)", [guild.id]);
-            servers[guild.id] = {timezone:'America/New_York', format:'t'};
+            servers[guild.id] = {timezone:'America/New_York', format:'t', update:()=>{guild.me.setNickname(getTimeString(guild.id));}};
         } else {
             // Otherwise cache the data  
-            servers[guild.id] = {timezone:res[0].timezone, format:res[0].format};
+            servers[guild.id] = {timezone:res[0].timezone, format:res[0].format, update:()=>{guild.me.setNickname(getTimeString(guild.id));}};
         }
         
         // Set time on join
@@ -99,7 +99,18 @@ async function join(message){
 }
 
 client.on('message', message =>{
-    if(message.content.match(/^!time\w*/g)){
+    if(message.content.match(/^!time\s+zone\s+\S*/g)){
+        let result = /^!time\s+zone\s+(\S*)\s*/g.exec(message.content);
+        if(!IANAZone.isValidZone(result[1])){
+            message.reply("Invalid timezone: `"+result[1]+'`');
+            return;
+        }
+        connection.query("UPDATE servers SET timezone=? WHERE id=?", [result[1], message.guild.id]);
+        if(servers[message.guild.id] != undefined){
+            servers[message.guild.id].timezone = result[1];
+            servers[message.guild.id].update();
+        }
+    } else if(message.content.match(/^!time\s*/g)){
         join(message);
     }
 });
