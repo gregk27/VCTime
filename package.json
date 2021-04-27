@@ -22,5 +22,6 @@
   "homepage": "https://github.com/gregk27/vctime#readme",
   "dependencies": {
     "discord.js": "^12.5.3"
-  }
+  },
+  "type": "module"
 }
