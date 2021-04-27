@@ -59,6 +59,12 @@ async function join(message){
 
     // Do not join multiple times, may cause bugs with updates
     if(servers[guild.id] != undefined){
+        message.reply("VCTime is already in a voice channel.");
+        return;
+    }
+    // If the sender isn't in a voice channel, then alert and stop
+    if(channel == null || channel == undefined){
+        message.reply("Please enter a voice channel to use VCTime");
         return;
     }
 
