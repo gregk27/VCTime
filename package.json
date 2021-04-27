@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/gregk27/vctime/issues"
   },
-  "homepage": "https://github.com/gregk27/vctime#readme"
+  "homepage": "https://github.com/gregk27/vctime#readme",
+  "dependencies": {
+    "discord.js": "^12.5.3"
+  }
 }
