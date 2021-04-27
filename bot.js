@@ -99,7 +99,9 @@ async function join(message){
 }
 
 client.on('message', message =>{
-    if(message.content.match(/^!time\s+zone\s+\S*/g)){
+    if(message.content.match(/^!time\s+help\s*/g)){
+        message.channel.send("VCTime shows the current time int a voice chat\nThis allows users with the overlay to see the current time\n**Commands:**\n**!time**: Join the sender's voice channel\n**!time zone [zone]**: Set the bot's timezone to [zone], using tz/IANA timezones\n**!time format [format]**: Set the bot's clock format, using Luxon tokens (<https://moment.github.io/luxon/docs/manual/formatting.html#table-of-tokens>)");
+    } else if(message.content.match(/^!time\s+zone\s+\S*/g)){
         let result = /^!time\s+zone\s+(\S*)\s*/g.exec(message.content);
         if(!IANAZone.isValidZone(result[1])){
             message.reply("Invalid timezone: `"+result[1]+'`');
