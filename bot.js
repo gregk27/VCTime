@@ -14,10 +14,15 @@ client.once('ready', ()=>{
  */
 function getClock(d){
     let id = 0x1F550;
-    id += d.getHours() % 13 - 1;
+    if(d.getHours() == 0){
+        id += 11;
+    } else {
+        id += d.getHours() % 13 - 1;
+    }
     if(d.getMinutes() >= 30){
         id += 0xC;
     }
+    console.log(id.toString(16));
     return String.fromCodePoint(id);
 }
 
@@ -28,17 +33,31 @@ function getTimeString(){
 
 client.on('message', message =>{
     if(message.content.match(/^!time\w*/g)){
-        message.member.voice.channel.join();
+        let channel = message.member.voice.channel;
+        let guild = message.guild;
+
         // Set time on join
-        message.guild.me.setNickname(getTimeString());
+        guild.me.setNickname(getTimeString());
+        let interval;
         setTimeout(() => {
             // Set time before timeout begins
-            message.guild.me.setNickname(getTimeString());
-            setInterval(() => {
+            guild.me.setNickname(getTimeString());
+            interval = setInterval(() => {
                 // Update every minute
-                message.guild.me.setNickname(getTimeString());
+                guild.me.setNickname(getTimeString());
+                // Leave if channel is empty
+                if(channel.members.size == 1){
+                    channel.leave();
+                }
             }, 60000);
         }, (60-new Date().getSeconds())*1000);
+
+        channel.join().then(connection=>{
+            connection.on('disconnect', ()=>{
+                guild.me.setNickname("VCTime | !time to join");
+                clearInterval(interval);
+            })
+        });
     }
 });
 
