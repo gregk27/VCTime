@@ -25,6 +25,8 @@ client.once('ready', ()=>{
     console.log("Ready!");
 })
 
+var servers = {};
+
 /**
  * Get the unicode clock for a time
  * @param {Date} d 
@@ -42,9 +44,9 @@ function getClock(d){
     return String.fromCodePoint(id);
 }
 
-function getTimeString(){
+function getTimeString(id){
     let d = new Date();
-    return `${getClock(d)} ${DateTime.now().setZone('America/New_York').toFormat('t')}`;
+    return `${getClock(d)} ${DateTime.now().setZone(servers[id].timezone).toFormat(servers[id].format)}`;
 }
 
 /**
@@ -55,28 +57,39 @@ async function join(message){
     let channel = message.member.voice.channel;
     let guild = message.guild;
 
-    // Set time on join
-    guild.me.setNickname(getTimeString());
-    let interval;
-    setTimeout(() => {
-        // Set time before timeout begins
-        guild.me.setNickname(getTimeString());
-        interval = setInterval(() => {
-            // Update every minute
-            guild.me.setNickname(getTimeString());
-            // Leave if channel is empty
-            if(channel.members.size == 1){
-                channel.leave();
-            }
-        }, 60000);
-    }, (60-new Date().getSeconds())*1000);
-
-    channel.join().then(connection=>{
-        connection.on('disconnect', ()=>{
-            guild.me.setNickname("VCTime | !time to join");
-            clearInterval(interval);
-        })
-    });
+    connection.query("SELECT * FROM servers WHERE id=?", [guild.id], (err, res, fields)=>{
+        // If the server is new, add and cache it
+        if(res.length == 0){
+            connection.query("INSERT INTO servers (id) VALUES (?)", [guild.id]);
+            servers[guild.id] = {timezone:'America/New_York', format:'t'};
+        } else {
+            // Otherwise cache the data  
+            servers[guild.id] = {timezone:res[0].timezone, format:res[0].format};
+        }
+        
+        // Set time on join
+        guild.me.setNickname(getTimeString(guild.id));
+        let interval;
+        setTimeout(() => {
+            // Set time before timeout begins
+            guild.me.setNickname(getTimeString(guild.id));
+            interval = setInterval(() => {
+                // Update every minute
+                guild.me.setNickname(getTimeString(guild.id));
+                // Leave if channel is empty
+                if(channel.members.size == 1){
+                    channel.leave();
+                }
+            }, 60000);
+        }, (60-new Date().getSeconds())*1000);
+        
+        channel.join().then(connection=>{
+            connection.on('disconnect', ()=>{
+                guild.me.setNickname("VCTime | !time to join");
+                clearInterval(interval);
+            })
+        });
+    })
 }
 
 client.on('message', message =>{
