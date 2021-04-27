@@ -33,3 +33,4 @@ npm-debug.log
 .DS_Store
 
 secrets.js
+log.txt

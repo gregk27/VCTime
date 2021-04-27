@@ -2,6 +2,7 @@ import { token, DB_HOST, DB_USER, DB_PASS } from "./secrets.js";
 import Discord, { DataResolver } from "discord.js";
 import { DateTime, IANAZone } from 'luxon';
 import mysql from "mysql";
+import log from './log.js';
 
 const client = new Discord.Client();
 
@@ -11,18 +12,19 @@ var connection = mysql.createConnection({
     password: DB_PASS,
     database: 'vctime'
 })
+log("\n-------------\n")
 
 connection.connect(err => {
     if(err){
-        console.error("Error connecting: "+err.stack);
+        log("Error connecting: "+err.stack);
         process.exit(1);
     } else {
-        console.log("Database connected")
+        log("Database connected")
     }
 })
 
 client.once('ready', ()=>{
-    console.log("Ready!");
+    log("Discord Connected!");
 })
 
 var servers = {};
@@ -68,11 +70,14 @@ async function join(message){
         return;
     }
 
+    log(`Joined ${guild.id} channel ${channel.id}`);
+
     connection.query("SELECT * FROM servers WHERE id=?", [guild.id], (err, res, fields)=>{
         // If the server is new, add and cache it
         if(res.length == 0){
             connection.query("INSERT INTO servers (id) VALUES (?)", [guild.id]);
             servers[guild.id] = {timezone:'America/New_York', format:'t', channel, update:()=>{guild.me.setNickname(getTimeString(guild.id));}};
+            log(`Created database entry for ${guild.id}`);
         } else {
             // Otherwise cache the data  
             servers[guild.id] = {timezone:res[0].timezone, format:res[0].format, channel, update:()=>{guild.me.setNickname(getTimeString(guild.id));}};
@@ -99,6 +104,7 @@ async function join(message){
                 guild.me.setNickname("VCTime | !time to join");
                 clearInterval(interval);
                 servers[guild.id] = undefined;
+                log(`Left ${guild.id} channel ${channel.id}`);
             })
         });
     })
@@ -118,6 +124,7 @@ client.on('message', message =>{
             servers[message.guild.id].timezone = result[1];
             servers[message.guild.id].update();
         }
+        log(`Updated timezone for ${message.guild.id} to ${result[1]}`);
     } else if(message.content.match(/^!time\s+format\s+.*/g)){
         let result = /^!time\s+format\s+(.*)\s*/g.exec(message.content);
         connection.query("UPDATE servers SET format=? WHERE id=?", [result[1], message.guild.id]);
@@ -125,6 +132,7 @@ client.on('message', message =>{
             servers[message.guild.id].format = result[1];
             servers[message.guild.id].update();
         }
+        log(`Updated format for ${message.guild.id} to ${result[1]}`);
     } else if(message.content.match(/^!time leave/g)){
         if(servers[message.guild.id] != undefined && message.member.voice.channel == servers[message.guild.id].channel){
             servers[message.guild.id].channel.leave();
