@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/gregk27/vctime#readme",
   "dependencies": {
-    "dateformat": "^4.5.1",
-    "discord.js": "^12.5.3"
+    "discord.js": "^12.5.3",
+    "luxon": "^1.26.0"
   },
   "type": "module"
 }

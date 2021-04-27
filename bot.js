@@ -1,6 +1,6 @@
 import { token } from "./secrets.js";
 import Discord, { DataResolver } from "discord.js";
-import dateFormat from "dateformat";
+import { DateTime } from 'luxon';
 
 const client = new Discord.Client();
 
@@ -22,13 +22,12 @@ function getClock(d){
     if(d.getMinutes() >= 30){
         id += 0xC;
     }
-    console.log(id.toString(16));
     return String.fromCodePoint(id);
 }
 
 function getTimeString(){
     let d = new Date();
-    return `${getClock(d)} ${dateFormat(d, "hh:MM tt")}`;
+    return `${getClock(d)} ${DateTime.now().setZone('America/New_York').toFormat('t')}`;
 }
 
 client.on('message', message =>{
