@@ -1,0 +1,23 @@
+{
+  "name": "vctime",
+  "version": "1.0.0",
+  "description": "Discord bot to show time in voice chat overlay",
+  "main": "bot.js",
+  "scripts": {
+    "test": "node bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregk27/vctime.git"
+  },
+  "keywords": [
+    "discord",
+    "bot"
+  ],
+  "author": "Gregory Kelly",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gregk27/vctime/issues"
+  },
+  "homepage": "https://github.com/gregk27/vctime#readme"
+}
