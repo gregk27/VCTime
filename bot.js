@@ -110,6 +110,13 @@ client.on('message', message =>{
             servers[message.guild.id].timezone = result[1];
             servers[message.guild.id].update();
         }
+    } else if(message.content.match(/^!time\s+format\s+.*/g)){
+        let result = /^!time\s+format\s+(.*)\s*/g.exec(message.content);
+        connection.query("UPDATE servers SET format=? WHERE id=?", [result[1], message.guild.id]);
+        if(servers[message.guild.id] != undefined){
+            servers[message.guild.id].format = result[1];
+            servers[message.guild.id].update();
+        }
     } else if(message.content.match(/^!time\s*/g)){
         join(message);
     }
