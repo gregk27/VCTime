@@ -72,10 +72,10 @@ async function join(message){
         // If the server is new, add and cache it
         if(res.length == 0){
             connection.query("INSERT INTO servers (id) VALUES (?)", [guild.id]);
-            servers[guild.id] = {timezone:'America/New_York', format:'t', update:()=>{guild.me.setNickname(getTimeString(guild.id));}};
+            servers[guild.id] = {timezone:'America/New_York', format:'t', channel, update:()=>{guild.me.setNickname(getTimeString(guild.id));}};
         } else {
             // Otherwise cache the data  
-            servers[guild.id] = {timezone:res[0].timezone, format:res[0].format, update:()=>{guild.me.setNickname(getTimeString(guild.id));}};
+            servers[guild.id] = {timezone:res[0].timezone, format:res[0].format, channel, update:()=>{guild.me.setNickname(getTimeString(guild.id));}};
         }
         
         // Set time on join
@@ -106,7 +106,7 @@ async function join(message){
 
 client.on('message', message =>{
     if(message.content.match(/^!time\s+help\s*/g)){
-        message.channel.send("VCTime shows the current time int a voice chat\nThis allows users with the overlay to see the current time\n**Commands:**\n**!time**: Join the sender's voice channel\n**!time zone [zone]**: Set the bot's timezone to [zone], using tz/IANA timezones\n**!time format [format]**: Set the bot's clock format, using Luxon tokens (<https://moment.github.io/luxon/docs/manual/formatting.html#table-of-tokens>)");
+        message.channel.send("VCTime shows the current time int a voice chat\nThis allows users with the overlay to see the current time\n**Commands:**\n**!time**: Join the sender's voice channel\n**!time leave**: Disconnect from VC, sender must be in the same voice channel to work\n**!time zone [zone]**: Set the bot's timezone to [zone], using tz/IANA timezones\n**!time format [format]**: Set the bot's clock format, using Luxon tokens (<https://moment.github.io/luxon/docs/manual/formatting.html#table-of-tokens>)");
     } else if(message.content.match(/^!time\s+zone\s+\S*/g)){
         let result = /^!time\s+zone\s+(\S*)\s*/g.exec(message.content);
         if(!IANAZone.isValidZone(result[1])){
@@ -124,6 +124,12 @@ client.on('message', message =>{
         if(servers[message.guild.id] != undefined){
             servers[message.guild.id].format = result[1];
             servers[message.guild.id].update();
+        }
+    } else if(message.content.match(/^!time leave/g)){
+        if(servers[message.guild.id] != undefined && message.member.voice.channel == servers[message.guild.id].channel){
+            servers[message.guild.id].channel.leave();
+        } else {
+            message.reply("VCTime is not connected to your channel.");
         }
     } else if(message.content.match(/^!time\s*/g)){
         join(message);
