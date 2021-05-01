@@ -48,6 +48,10 @@ function getClock(d){
 
 function getTimeString(id){
     let d = new Date();
+    if(servers[id] == undefined || servers[id] == null){
+        log("Invalid request for time string");
+        return "VCTime";
+    }
     return `${getClock(d)} ${DateTime.now().setZone(servers[id].timezone).toFormat(servers[id].format)}`;
 }
 
@@ -87,6 +91,8 @@ async function join(message){
         guild.me.setNickname(getTimeString(guild.id));
         let interval;
         setTimeout(() => {
+            // If the bot has already been disconnected then do nothing
+            if(servers[guild.id] == undefined) return;
             // Set time before timeout begins
             guild.me.setNickname(getTimeString(guild.id));
             interval = setInterval(() => {
