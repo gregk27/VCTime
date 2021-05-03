@@ -1,3 +1,4 @@
+log("\n-------------\n")
 import { token, DB_HOST, DB_USER, DB_PASS } from "./secrets.js";
 import Discord, { DataResolver } from "discord.js";
 import { DateTime, IANAZone } from 'luxon';
@@ -12,7 +13,6 @@ var connection = mysql.createConnection({
     password: DB_PASS,
     database: 'vctime'
 })
-log("\n-------------\n")
 
 connection.connect(err => {
     if(err){

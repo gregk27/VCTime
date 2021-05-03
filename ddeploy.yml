@@ -1,0 +1,6 @@
+context: server
+name: vctime
+restart: always
+network: host
+env:
+  - PROD: true
